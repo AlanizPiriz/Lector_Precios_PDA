@@ -1,5 +1,7 @@
-let data = [];
+    let data = [];
     let typingTimer;
+    let ticketsAcumulados = localStorage.getItem("tickets") || "";
+    
 
     // ---------- IndexedDB Helpers ----------
     const dbName = "ExcelDB";
@@ -118,11 +120,12 @@ let data = [];
 
       	if (found) {
   	// Convertimos el objeto en un array de [key, value]
+    window.ultimoProducto = found;
   	const entries = Object.entries(found);
 
   	// Separamos el PVP del resto
   	const pvpEntry = entries.find(([key]) => key.toLowerCase() === 'pvp');
- 	const otherEntries = entries.filter(([key]) => key.toLowerCase() !== 'pvp');
+ 	  const otherEntries = entries.filter(([key]) => key.toLowerCase() !== 'pvp');
 
   	// Armamos el HTML
   	let html = '';
@@ -165,12 +168,98 @@ let data = [];
 
     let cbosTab; // Variable global
 
+//document.getElementById('yesBtn').addEventListener('click', function() {
+//  const url = "https://cbos.arcadiasuite.com/cbos/storeLabelGenerateFind.html";
+//  
+//  if (!cbosTab || cbosTab.closed) {
+//    cbosTab = window.open(url, "cbosTab");
+//  } else {
+//    cbosTab.focus();
+//  }
+//});
+
+function limpiarTexto(texto) {
+  return String(texto || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function formatearNombre(nombre) {
+  nombre = limpiarTexto(nombre);
+
+  if (nombre.length > 30) {
+    nombre = nombre.substring(0, 30);
+    nombre = nombre.substring(0, nombre.lastIndexOf(" "));
+  }
+
+  return nombre;
+}
+
+function generarEtiqueta(producto) {
+  const nombre = formatearNombre(producto["Artículo"]);
+  const precio = producto["PVP"] || "";
+  const codigo = String(producto["Cód. barras ppal."] || "").replace(/\D/g, "");
+
+  return `
+n
+L
+H30
+PE
+z
+D11
+191100300850095${nombre}
+191100700500150$${precio}
+1E1202000040112B${codigo}
+Q1
+E
+`;
+}
+
+
+// ---------- Agregar ticket ----------
+function agregarTicket(producto) {
+
+  ticketsAcumulados = localStorage.getItem("tickets") || "";
+
+  const ticket = generarEtiqueta(producto);
+
+  ticketsAcumulados += ticket;
+  localStorage.setItem("tickets", ticketsAcumulados);
+
+  alert("Ticket agregado ✅");
+}
+
 document.getElementById('yesBtn').addEventListener('click', function() {
-  const url = "https://cbos.arcadiasuite.com/cbos/storeLabelGenerateFind.html";
-  
-  if (!cbosTab || cbosTab.closed) {
-    cbosTab = window.open(url, "cbosTab");
+  if (window.ultimoProducto) {
+    agregarTicket(window.ultimoProducto);
   } else {
-    cbosTab.focus();
+    alert("No hay producto ❌");
+  }
+});
+
+// ---------- Descargar ----------
+document.getElementById('downloadTickets').addEventListener('click', function() {
+  if (!ticketsAcumulados.trim()) {
+    alert("No hay tickets ❌");
+    return;
+  }
+
+  const blob = new Blob([ticketsAcumulados], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `tickets_${Date.now()}.txt`;
+  a.click();
+
+  URL.revokeObjectURL(url);
+});
+
+// ---------- Borrar ----------
+document.getElementById('clearTickets').addEventListener('click', function() {
+  if (confirm("¿Borrar todos los tickets?")) {
+    ticketsAcumulados = "";
+    localStorage.removeItem("tickets");
+    alert("Borrado ✅");
   }
 });
