@@ -6,11 +6,17 @@ body {
 }
 input, button {
   margin: 5px 0;
-  padding: 10px;
+  padding: 10px 10px 10px 0px;
   font-size: 16px;
   width: 100%;
   box-sizing: border-box;
 }
+
+#excelFile {
+  width: 50%;
+  display: flex;
+}
+
 #result {
   margin-top: 20px;
   border: 1px solid #ccc;

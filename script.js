@@ -225,8 +225,10 @@ function agregarTicket(producto) {
 
   ticketsAcumulados += ticket;
   localStorage.setItem("tickets", ticketsAcumulados);
+  
 
   alert("Ticket agregado ✅");
+  document.getElementById('searchInput').focus();
 }
 
 document.getElementById('yesBtn').addEventListener('click', function() {
