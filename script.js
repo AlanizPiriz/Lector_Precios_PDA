@@ -230,18 +230,31 @@ E
 
 // ---------- Agregar ticket ----------
 function agregarTicket(producto) {
+    const ticket = generarEtiqueta(producto);
+    
+    // Actualizamos la variable global y el storage
+    ticketsAcumulados += ticket;
+    localStorage.setItem("tickets", ticketsAcumulados);
 
-  ticketsAcumulados = localStorage.getItem("tickets") || "";
+    // Notificación visual rápida (Toast)
+    mostrarToast("Ticket agregado ✅");
 
-  const ticket = generarEtiqueta(producto);
-
-  ticketsAcumulados += ticket;
-  localStorage.setItem("tickets", ticketsAcumulados);
-  
-
-  alert("Ticket agregado ✅");
-  document.getElementById('searchInput').focus();
+    // En PDA, limpiar el valor antes del focus asegura que el siguiente escaneo sea limpio
+    const input = document.getElementById('searchInput');
+    input.value = ''; 
+    input.focus();
 }
+
+function mostrarToast(mensaje) {
+    const toast = document.getElementById("toast");
+    toast.innerText = mensaje;
+    toast.style.visibility = "visible";
+    
+    setTimeout(() => { 
+        toast.style.visibility = "hidden"; 
+    }, 1500); // 1.5 segundos es ideal para no saturar al operario
+}
+
 
 document.getElementById('yesBtn').addEventListener('click', function() {
   if (window.ultimoProducto) {
