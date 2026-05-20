@@ -114,9 +114,13 @@
 
       const resultDiv = document.getElementById('result');
       const infoDiv = document.getElementById('productInfo');
+      // const found = data.find(row =>
+      //   Object.values(row).some(val => String(val).toLowerCase().includes(term))
+      // );
       const found = data.find(row =>
-        Object.values(row).some(val => String(val).toLowerCase().includes(term))
-      );
+          Object.values(row).some(val => String(val).trim() === String(term).trim())
+         );
+
 
       	if (found) {
   	// Convertimos el objeto en un array de [key, value]
